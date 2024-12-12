@@ -452,11 +452,281 @@
       <div class="row"><a href="#pagina3"><button type="button" id="pag3div2" class="btn btn-primary">Pagina 3 (Semafori)</button></a></div>                  
    </div>
    <div id="pagina3" class="page spazio">
-      <div class="row">Questo è il contenuto di pagina 3</div> 
+      <div class="row"><div><h1>Semafori</h1></div>
+         <div id="eckb-article-content-body"><h2 class="wp-block-heading" data-id="articleTOC_0"><strong>Premessa</strong></h2>
+
+
+
+            <p>Come sappiamo due funzioni in esecuzione in parallelo con memoria condivisa possono avere problemi di interferenza di sincronizzazione (dovuti a problematiche legate al tempo) e di competizione (dovuti a problematiche legate ai dati). Questo avviene sia quando siamo in uno scenario di interleaving (esecuzione concorrente) che di overlapping (esecuzione parallela).</p>
+            
+            
+            
+            <p>Dal punto di vista più formale quando si scrive una applicazione in programmazione parallela, occorre soddisfare le condizioni di Bernstein:</p>
+            
+            
+            
+            <p><strong>R(f1)&nbsp;</strong><strong>⋂&nbsp;</strong><strong>R(F2) =&nbsp;</strong><strong>∅</strong></p>
+            
+            
+            
+            <p><strong>R(F)&nbsp;</strong><strong>⋂&nbsp;</strong><strong>D(F2) =&nbsp;</strong><strong>∅</strong></p>
+            
+            
+            
+            <p><strong>D(F1)&nbsp;</strong><strong>⋂&nbsp;</strong><strong>R(F2) =&nbsp;</strong><strong>∅</strong></p>
+            
+            
+            
+            <p>dove f1 e f2 sono le due funzioni parallele, R il rango e D il dominio delle funzioni. Più semplicemente, una funzione che scrive delle variabili non può essere eseguita in parallelo di una funzione che legge o scrive lo stesso insieme di variabili.</p>
+            
+            
+            
+            <p>Compito del programmatore è quindi scrivere delle funzioni parallele che garantiscano <strong>mutua esclusione</strong> ed impediscano <strong>starvation</strong> (applicazione sempre in attesa) e <strong>deadlock</strong> (dipendenze cicliche).&nbsp;</p>
+            
+            
+            
+            <p>In conclusione le applicazioni parallele devono garantire la stessa correttezza che avrebbero se fossero eseguite come delle applicazioni sequenziali.&nbsp;</p>
+            
+            
+            
+            <h2 class="wp-block-heading" data-id="articleTOC_1"><strong>Sezione critica</strong></h2>
+            
+            
+            
+            <p>Per risolvere i problemi di parallelismo introduciamo il concetto di sezione critica.</p>
+            
+            
+            
+            <p>Una sezione critica è una particolare porzione del codice che può essere eseguita solo da un limitato numero di thread in contemporanea, o uno soltanto. Questo concetto si applica esclusivamente ad applicazioni a memoria condivisa (come i thread, ma non come i processi).</p>
+            
+            
+            
+            <p>La sezione critica garantisce quindi che una sola funzione (o un numero limitato) accedano a risorse condivise, per tutto il tempo necessario ad usare la risorsa condivisa, senza rischi di interferenza. Si veda in figura uno schema di accesso con un solo processo nella sezione critica.</p>
+            
+            
+            
+            <figure class="wp-block-image size-full"><img fetchpriority="high" decoding="async" width="632" height="556" src="https://cipiaceinfo.it/wp-content/uploads/2024/07/image-17.png" alt="" class="wp-image-243" srcset="https://cipiaceinfo.it/wp-content/uploads/2024/07/image-17.png 632w, https://cipiaceinfo.it/wp-content/uploads/2024/07/image-17-300x264.png 300w, https://cipiaceinfo.it/wp-content/uploads/2024/07/image-17-230x202.png 230w, https://cipiaceinfo.it/wp-content/uploads/2024/07/image-17-350x308.png 350w, https://cipiaceinfo.it/wp-content/uploads/2024/07/image-17-480x422.png 480w" sizes="(max-width: 632px) 100vw, 632px"></figure>
+            
+            
+            
+            <p>Sono molti gli esempi nel mondo reale che presentano una qualche analogia con il concetto di sezione critica:</p>
+            
+            
+            
+            <p>– un supermercato con una cassa: i clienti che hanno riempito il carrello in modo indipendente si devono mettere in coda alla cassa, venendo serviti uno solo alla volta. Dopo aver pagato tornano indipendenti.</p>
+            
+            
+            
+            <p>– un ufficio postale con sportelli dove occorre prendere un numero di prenotazione, ed attendere il proprio turno venendo chiamati dal primo sportello libero.</p>
+            
+            
+            
+            <p>– il casello autostradale con uno o più valichi di accesso, dove si formano code parallele per ciascuna corsia.</p>
+            
+            
+            
+            <p>Nel codice si ha una sezione critica quando più thread hanno bisogno di accedere ad una variabile condivisa, ad esempio per poter modificare quella variabile. Ipotizziamo di avere una funzione che sarà eseguita da due thread che eseguono lo stesso codice:</p>
+            
+            
+            
+            <div class="hcb_wrap"><pre class="prism line-numbers  language-cpp" data-lang="C++"><code class=" language-cpp" data-hcb-clip="1"><span class="token keyword">void</span> <span class="token function">somma</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span>b<span class="token punctuation">,</span> <span class="token keyword">int</span> a<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+               <span class="token keyword">int</span> sum <span class="token operator">=</span> a <span class="token operator">+</span> <span class="token operator">*</span>b<span class="token punctuation">;</span>
+               <span class="token operator">*</span>b <span class="token operator">=</span> sum<span class="token punctuation">;</span>   
+            <span class="token punctuation">}</span>
+            
+            <span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+              <span class="token keyword">int</span> b <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">;</span>
+               thread thread0 <span class="token operator">=</span> <span class="token function">thread</span><span class="token punctuation">(</span>somma<span class="token punctuation">,</span> <span class="token operator">&amp;</span>b<span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+               thread thread1 <span class="token operator">=</span> <span class="token function">thread</span><span class="token punctuation">(</span>somma<span class="token punctuation">,</span> <span class="token operator">&amp;</span>b<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+               thread0<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+               thread1<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+               <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><button class="hcb-clipboard" data-clipboard-target="[data-hcb-clip=&quot;1&quot;]" data-clipboard-action="copy" aria-label="Copy code to clipboard"></button></div>
+            
+            
+            
+            <p>La variabile b è letta e scritta da entrambi i thread, in istruzioni differenti. Come si può vedere il rango delle due funzioni coincide quindi ci si deve aspettare una qualche interferenza. Ad esempio potrebbe essere eseguita questa sequenza di istruzioni:</p>
+            
+            
+            
+            <figure class="wp-block-table"><table><tbody><tr><td>thread 0</td><td>&nbsp;&nbsp;&nbsp;int sum = a + *b;</td></tr><tr><td>thread 1</td><td>&nbsp;&nbsp;&nbsp;int sum = a + *b;</td></tr><tr><td>thread 1</td><td>&nbsp;&nbsp;&nbsp;*b = sum;&nbsp;&nbsp;</td></tr><tr><td>thread 0</td><td>&nbsp;&nbsp;&nbsp;*b = sum;</td></tr></tbody></table></figure>
+            
+            
+            
+            <p>Il valore finale di b sarebbe 8 mentre gli effetti dell’ultima istruzione del thread 1 completamente annullati. Un’altra esecuzione (si ricorda che lo scheduling non è deterministico) l’ordine di esecuzione delle singole istruzioni potrebbe essere:</p>
+            
+            
+            
+            <figure class="wp-block-table"><table><tbody><tr><td>thread 0</td><td>&nbsp;&nbsp;&nbsp;int sum = a + *b;</td></tr><tr><td>thread 1</td><td>&nbsp;&nbsp;&nbsp;int sum = a + *b;</td></tr><tr><td>thread 0</td><td>&nbsp;&nbsp;&nbsp;*b = sum;&nbsp;&nbsp;</td></tr><tr><td>thread 1</td><td>&nbsp;&nbsp;&nbsp;*b = sum;</td></tr></tbody></table></figure>
+            
+            
+            
+            <p>In questo caso b varrebbe 5 e sarebbe il thread 0 ad essere penalizzato. Già con un caso molto semplice, con una funzione di appena due righe di codice, possiamo avere comportamenti del tutto inaspettati. </p>
+            
+            
+            
+            <p>La sezione critica nasce per questo: impedire che l’esecuzione sia “imprevedibile” e che porti quindi a risultati diversi da quelli attesi. </p>
+            
+            
+            
+            <p>Per risolvere questo problema ci si affida ad una libreria di sistema operativo, detta semaforo. Sarà il sistema operativo che tramite il semaforo regolerà il traffico in entrata ed uscita dalla sezione critica.</p>
+            
+            
+            
+            <p>Vediamolo in dettaglio.</p>
+            
+            
+            
+            <h2 class="wp-block-heading" data-id="articleTOC_2">Mutex (o semaforo binario)</h2>
+            
+            
+            
+            <p>Il semaforo binario, detto anche mutex, è una variabile che può essere modificata da un solo thread alla volta. E’ una variabile gestita dal sistema operativo, e il thread in esecuzione non ha quindi controllo sulla scrittura del mutex. Può semplicemente cercare di acquisirlo (lock), restando in attesa se occupato, e rilasciarlo, liberandolo per il thread successivo.</p>
+            
+            
+            
+            <p>In pratica si entra nella sezione critica eseguendo un lock sul semaforo (che diventa “rosso”), si esegue la sequenza di operazioni critiche, e poi si rilascia il lock (il semaforo diventa “verde”).</p>
+            
+            
+            
+            <div class="hcb_wrap"><pre class="prism line-numbers  language-cpp" data-lang="C++"><code class=" language-cpp" data-hcb-clip="2">mutex mtx<span class="token punctuation">;</span>
+            <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+            
+            mtx<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+            <span class="token comment">/*
+            critical istructions
+            */</span>
+            mtx<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            
+            <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><button class="hcb-clipboard" data-clipboard-target="[data-hcb-clip=&quot;2&quot;]" data-clipboard-action="copy" aria-label="Copy code to clipboard"></button></div>
+            
+            
+            
+            <p>Se un thread richiederà il semaforo mentre il primo è ancora dentro la sezione critica, lo troverà “rosso”, quindi si fermerà ed attenderà che diventi verde. E’ il sistema operativo che fornisce questa funzionalità: tutti i thread che richiedono il lock del mutex sono messi in attesa che il semaforo sia sbloccato. Inoltre il sistema operativo garantisce che l’operazione avvenga in perfetta sincronia per tutti i processori, quindi anche in caso di richiesta contemporanea di un semaforo da parte di più processori, tutte le parallelizzazioni sono sospese.&nbsp;</p>
+            
+            
+            
+            <p>Il codice precedente diventa quindi:</p>
+            
+            
+            
+            <div class="hcb_wrap"><pre class="prism line-numbers  language-cpp" data-lang="C++"><code class=" language-cpp" data-hcb-clip="3">mutex mtx<span class="token punctuation">;</span>
+            
+            <span class="token keyword">void</span> <span class="token function">somma</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span>b<span class="token punctuation">,</span> <span class="token keyword">int</span> a<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+               mtx<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+               <span class="token keyword">int</span> sum <span class="token operator">=</span> a <span class="token operator">+</span> <span class="token operator">*</span>b<span class="token punctuation">;</span>
+               <span class="token operator">*</span>b <span class="token operator">=</span> sum<span class="token punctuation">;</span>  
+               mtx<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+            <span class="token punctuation">}</span>
+            
+            <span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+              <span class="token keyword">int</span> b <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">;</span>
+               thread thread0 <span class="token operator">=</span> <span class="token function">thread</span><span class="token punctuation">(</span>somma<span class="token punctuation">,</span> <span class="token operator">&amp;</span>b<span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+               thread thread1 <span class="token operator">=</span> <span class="token function">thread</span><span class="token punctuation">(</span>somma<span class="token punctuation">,</span> <span class="token operator">&amp;</span>b<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+               thread0<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+               thread1<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+               <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><button class="hcb-clipboard" data-clipboard-target="[data-hcb-clip=&quot;3&quot;]" data-clipboard-action="copy" aria-label="Copy code to clipboard"></button></div>
+            
+            
+            
+            <p>Se si esegue questo codice si otterrà che solo uno dei thread potrà eseguire la somma.</p>
+            
+            
+            
+            <h2 class="wp-block-heading" data-id="articleTOC_3">Semaforo di Dijkstra (semaforo generalizzato)</h2>
+            
+            
+            
+            <p>Il&nbsp;<strong>semaforo generalizzato</strong>&nbsp;(o semaforo di&nbsp;<strong>Dijkstra</strong><a href="applewebdata://06300BE2-69BF-44EF-AFA5-C88477602ADE#_ftn1"><sup>[1]</sup></a>) è una estensione del semaforo binario che permette l’accesso alla sezione critica da parte di più di un thread alla volta. Operativamente il semaforo prevede un valore numerico (condiviso tra i thread) ed una coda di attesa. In C/C++ è gestita tramite due funzioni, P e V, che consentono l’accesso alla sezione critica ai thread.</p>
+            
+            
+            
+            <p>P: questa funzione, eseguita dal thread, richiede l’accesso alla sezione critica.</p>
+            
+            
+            
+            <div class="hcb_wrap"><pre class="prism line-numbers  language-cpp" data-lang="C++"><code class=" language-cpp" data-hcb-clip="4"><span class="token keyword">void</span> <span class="token function">p</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span>semaphore<span class="token punctuation">)</span> <span class="token punctuation">{</span>  
+              <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">*</span>semaphore <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                unique_lock<span class="token operator">&lt;</span>mutex<span class="token operator">&gt;</span> <span class="token function">lock</span><span class="token punctuation">(</span>m<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                cv<span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span>lock<span class="token punctuation">)</span><span class="token punctuation">;</span>    
+              <span class="token punctuation">}</span>
+              <span class="token punctuation">(</span><span class="token operator">*</span>semaphore<span class="token punctuation">)</span><span class="token operator">--</span><span class="token punctuation">;</span>  
+            <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><button class="hcb-clipboard" data-clipboard-target="[data-hcb-clip=&quot;4&quot;]" data-clipboard-action="copy" aria-label="Copy code to clipboard"></button></div>
+            
+            
+            
+            <p>Unique lock e wait sono funzioni di sistema operativo.<a href="applewebdata://06300BE2-69BF-44EF-AFA5-C88477602ADE#_ftn2"><sup>[2]</sup></a></p>
+            
+            
+            
+            <p>Quando un thread vuole accedere alla sezione critica esegue una operazione&nbsp;<strong>p(int *semaphore)</strong>&nbsp;dove semaphore è la variabile condivisa che contiene il numero di thread attualmente disponibili. Per prima cosa diminuisce di 1 il valore del semaforo. Se questo valore è sotto 0, il thread si mette in attesa.</p>
+            
+            
+            
+            <div class="hcb_wrap"><pre class="prism line-numbers  language-cpp" data-lang="C++"><code class=" language-cpp" data-hcb-clip="5"><span class="token keyword">void</span> <span class="token function">v</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span>semaphore<span class="token punctuation">)</span> <span class="token punctuation">{</span>    
+              <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token operator">*</span>semaphore<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                cv<span class="token punctuation">.</span><span class="token function">notify_one</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    
+              <span class="token punctuation">}</span>
+              <span class="token punctuation">(</span><span class="token operator">*</span>semaphore<span class="token punctuation">)</span><span class="token operator">++</span><span class="token punctuation">;</span>  
+            <span class="token punctuation">}</span>
+            <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><button class="hcb-clipboard" data-clipboard-target="[data-hcb-clip=&quot;5&quot;]" data-clipboard-action="copy" aria-label="Copy code to clipboard"></button></div>
+            
+            
+            
+            <p>Quando un thread esce dalla sezione critica, esegue una operazione&nbsp;<strong>v(int *semaphore)</strong>&nbsp;che aumenta di 1 il valore del semaforo. Se il valore è uguale a 0, il sistema operativo toglie il primo thread in attesa in coda e lo fa entrare in sezione critica.&nbsp;</p>
+            
+            
+            
+            <p>Poniamo di avere 3 thread ed un semaforo pari a 2.&nbsp;</p>
+            
+            
+            
+            <p>Questo significa che solo 2 thread in esecuzione possono entrare nella sezione critica. Il terzo thread si metterà in coda attendendo l’uscita di un qualsiasi altro thread nella sezione critica.</p>
+            
+            
+            
+            <p>Una analogia col mondo reale è quella dell’ufficio postale, con ad esempio 3 sportelli che servono 3 persone, e una persona in attesa (col numero di prenotazione) che attende che si liberi il primo sportello.</p>
+            
+            
+            
+            <p>Qui un esempio di semaforo di valore 3.</p>
+            
+            
+            
+            <figure class="wp-block-image size-full"><img decoding="async" width="598" height="176" src="https://cipiaceinfo.it/wp-content/uploads/2024/07/image-19.png" alt="" class="wp-image-247" srcset="https://cipiaceinfo.it/wp-content/uploads/2024/07/image-19.png 598w, https://cipiaceinfo.it/wp-content/uploads/2024/07/image-19-300x88.png 300w, https://cipiaceinfo.it/wp-content/uploads/2024/07/image-19-230x68.png 230w, https://cipiaceinfo.it/wp-content/uploads/2024/07/image-19-350x103.png 350w, https://cipiaceinfo.it/wp-content/uploads/2024/07/image-19-480x141.png 480w" sizes="(max-width: 598px) 100vw, 598px"></figure>
+            
+            
+            
+            <p></p>
+            
+            
+            
+            <hr class="wp-block-separator has-alpha-channel-opacity">
+            
+            
+            
+            <p><a href="applewebdata://06300BE2-69BF-44EF-AFA5-C88477602ADE#_ftnref1"><sup>[1]</sup></a>&nbsp;Dijikstra è stato uno dei più grandi informatici, inventore oltre che del semaforo (1965) anche del più noto algoritmo che prende il suo nome (che governa la distribuzione dei pacchetti nella rete Internet) e della teoria sulla verifica formale di un algoritmo. E’ noto per aver inventato (insieme a Wirth) la programmazione strutturata e infine per i suoi aforismi, come la famosa critica alla programmazione ad oggetti.&nbsp;</p>
+            
+            
+            
+            <p><a href="applewebdata://06300BE2-69BF-44EF-AFA5-C88477602ADE#_ftnref2"><sup>[2]</sup></a>&nbsp;La condition variable è oggetto che con l’istruzione wait() ferma il thread mettendolo in una coda e con l’istruzione notify() lo riattiva.</p>
+            
+            
+            
+            <p></p>
+            
+            
+            
+            <p></p>
+            </div>
+      </div> 
       <div class="row"><a href="#pagina1"><button type="button" id="pag1div3" class="btn btn-primary">Pagina 1 (Stack)</button></a></div>
       <div class="row"><a href="#pagina2"><button type="button" id="pag2div3" class="btn btn-primary">Pagina 3 (Semafori)</button></a></div>
    </div id="divHomeButton">
-      <a href="../index.html"><button type="button" id="home" class="btn btn-success">Home</button></a>
+      <a href="../index.html"><button type="button" id="home" class="btn btn-success btn-lg">Home</button></a>
    </div>
    <script type="module" src="./index.js"></script>
 
