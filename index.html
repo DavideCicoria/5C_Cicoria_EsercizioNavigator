@@ -223,18 +223,240 @@
          <div class="row"><a href="#pagina3"><button type="button" id="pag3div1" class="btn btn-primary">Pagina 3 (Semafori)</button></a></div>                  
    </div>
    <div id="pagina2" class="page spazio">
-      <div class="row"></div>   
-      <div class="row"><a href="#pagina1">Questo è un link a pagina 1</a></div>
-      <div class="row"><a href="#pagina3">Questo è un link a pagina 3</a></div>                  
+      <div class="row"><div><h1>Codice Assembly</h1>
+         <div id="eckb-article-content-body"><h2 class="wp-block-heading" data-id="articleTOC_0"><strong>Codice macchina e codice assembly</strong></h2>
+
+
+
+         <p>In un calcolatore, <strong>le istruzioni macchina sono in codice binario</strong>. Esse vengono decodificate direttamente dalla cpu (hardware) che poi esegue le istruzioni operando sui dati (registri e memoria).&nbsp;</p>
+         
+         
+         
+         <p>Possiamo in teoria usare direttamente il linguaggio macchina (che nella quasi totalità delle implementazioni è come sappiamo in codice binario), ma per rendere questo codice comprensibile agli esseri umani, senza perdere in validità, gli sviluppatori preferiscono usare il linguaggio assembly, che da una corrispondenza delle istruzioni codice macchina con codici alfanumerici che rappresentano istruzioni, registri e valori).&nbsp;</p>
+         
+         
+         
+         <p>In questa lezione introduciamo una versione puramente didattica del linguaggio assembly, con un set limitato di istruzioni. </p>
+         
+         
+         
+         <p>Nel presentare le istruzioni si ricorda che:<br>– la CPU presenta i registri di servizio PC, IR e SP (Program Counter, Instruction Register e Stack Pointer)</p>
+         
+         
+         
+         <p>– la CPU presenta i registri dati R0… R9</p>
+         
+         
+         
+         <p>– la memoria centrale è esterna alla cpu e ci si accede per caricare/scaricare celle da/verso i registri.</p>
+         
+         
+         
+         <p>In linguaggio assembly ogni istruzione ha la forma:</p>
+         
+         
+         
+         <p><strong><code>#INDIRIZZO: CODICEISTRUZIONE operando1, operando2, operando3&nbsp;</code></strong></p>
+         
+         
+         
+         <p>dove gli operandi possono essere da 0 a 3 (a seconda dell’istruzione).</p>
+         
+         
+         
+         <p>Gli operandi possono essere:</p>
+         
+         
+         
+         <p>–&nbsp;<strong>registri</strong>: nominati con prefisso $: ad esempio $R5, prende il valore contenuto nel registro</p>
+         
+         
+         
+         <p>–&nbsp;<strong>valori assoluti</strong>: si indica il numero senza prefissi (es. “5”)</p>
+         
+         
+         
+         <p>–&nbsp;<strong>indirizzi di memoria</strong>: si indica il numero con prefisso # (es. “#250” dove 250 è l’indirizzo di una cella di memoria)</p>
+         
+         
+         
+         <p>Vediamo quindi le istruzioni:</p>
+         
+         
+         
+         <figure class="wp-block-table"><table><tbody><tr><td>Operazioni</td><td>Elenco</td></tr><tr><td>operazioni aritmetiche (somma, prodotto, ecc.) e di confronto tra operandi, eseguite dalla ALU:&nbsp;<br></td><td><strong><code>ADD, SUB, MUL, DIV</code>&nbsp;</strong>il primo operatore è dove si memorizza il risultato (sempre un registro), gli altri due sono gli operandi (possono essere o registri o valori assoluti)<br>ad esempio:&nbsp;<br><code><em>ADD $r0, 1, $r1</em>&nbsp;</code>-&gt; salva in $r0 il valore di <code>$r1 +</code><br><code><em>MULT $r5, 2, $r3</em>&nbsp;</code>-&gt; moltiplica $r3 * 2 e salva in $r5&nbsp;<strong><code>CMP</code></strong>&nbsp;(compare)<br>compara due valori.ad esempio:&nbsp;<br><em><code>CMP $r0, $r2, $r5</code></em>&nbsp;-&gt; metto in $r5 il valore 0 se sono uguali, altrimenti -1 se minore, +1 se maggiore&nbsp;</td></tr><tr><td>operazioni di controllo, ad esempio salti ad una istruzione specifica (a seconda di una condizione o liberi), eseguiti dalla CU</td><td><strong><code>JMP</code></strong>&nbsp;(salto)<br>es: <code>JMP #50</code> -&gt; salta all’indirizzo 50&nbsp;<br><strong><code>BNE</code>&nbsp;</strong>(salto condizionato su diseguaglianza)<br>es. <code>BNE $r0, 5, #81</code> -&gt; salta all’indirizzo 81 se r0 è diverso da 5&nbsp;<br><strong><code>BEQ</code></strong>&nbsp;(salto condizionato su uguaglianza)Es: <br><code>BEQ $r0, 3, $r1</code> – &gt; salto all’indirizzo contenuto nel registro r1 se r0 è uguale a 3</td></tr><tr><td>operazioni di caricamento di registri dalla memoria e viveversa, eseguiti dalla CU&nbsp;</td><td><code><strong>STO</strong>&nbsp;<strong><em>sorgente destinazione</em></strong></code>&nbsp;(save),&nbsp;<br><strong><code>LOD&nbsp;<em>destinazione</em>&nbsp;<em>sorgente</em></code></strong>&nbsp;(load)carica e salva un dato dalla memoria<br>Es:&nbsp;<br><code>STO $r0 #451</code> -&gt; memorizzo il valore di $r0 nella cella #451<br><code>LOD $r6 $r2</code> -&gt; carico il valore all’indirizzo indicato da r2 in r6</td></tr><tr><td>Subroutine</td><td><code><strong>CAL</strong>&nbsp;XXX:</code> questa istruzione salva all’indirizzo $SP l’indirizzo dell’istruzione successiva, decrementa di 1 $SP ed esegue una jump all’indirizzo XXX.<br><strong><code>RET</code></strong>&nbsp;Questa istruzione copia in $PC il valore di $SP L’istruzione gestisce da sola l’incremento dello stack pointer.&nbsp;E’ necessario l’utilizzo del registro $SP per eseguire push e pop, aggiornando la posizione dello stack dopo ogni push e pop. Si ricorda che lo stack cresce dall’alto verso il basso (quindi $SP diminuisce di 1 con push, aumenta di 1 con pop).&nbsp;<br>Es:<br><code>CAL #212 </code>-&gt; memorizza indirizzo di ritorno in stack, aggiorna lo stack pointer, ed esegue un salto all’indirizzo 212.<br><code>RET</code> -&gt; carica l’indirizzo di ritorno dallo stack, aggiorna lo stack (pop) ed esegue il salto all’istruzione indicata</td></tr></tbody></table></figure>
+         
+         
+         
+         <h2 class="wp-block-heading" data-id="articleTOC_1"><strong>Un esempio pratico</strong></h2>
+         
+         
+         
+         <p>Esempio: vogliamo memorizzare la somma degli interi da 1 a n (cioè 1+2+3+…+n).&nbsp;</p>
+         
+         
+         
+         <p>Qui il codice C++: </p>
+         
+         
+         
+         <div class="hcb_wrap"><pre class="prism line-numbers  language-plain"><code class=" language-plain" data-hcb-clip="1">int sum(int n) {&nbsp;&nbsp;
+           int result = 0;&nbsp;&nbsp;
+           for (int i=0; i&lt;n; i++) {&nbsp;&nbsp;&nbsp;&nbsp;
+            result += i;&nbsp;&nbsp;
+           }&nbsp;&nbsp;
+           return result;
+         }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><button class="hcb-clipboard" data-clipboard-target="[data-hcb-clip=&quot;1&quot;]" data-clipboard-action="copy" aria-label="Copy code to clipboard"></button></div>
+         
+         
+         
+         <p>Useremo i seguenti registri per memorizzare il valore delle variabili:</p>
+         
+         
+         
+         <p>$r0 -&gt; n</p>
+         
+         
+         
+         <p>$r1 -&gt; result</p>
+         
+         
+         
+         <p>$r2 -&gt; i</p>
+         
+         
+         
+         <p>$r3 -&gt; registro di servizio che useremo per gestire il ciclo</p>
+         
+         
+         
+         <p>$r8 -&gt; contiene l’indirizzo di memoria fisica dove si trova n (inserito dall’utente)</p>
+         
+         
+         
+         <p>$r9 -&gt; contiene l’indirizzo di memoria fisica dove memorizzare il risultato result alla fine</p>
+         
+         
+         
+         <p>Vediamo il codice (che ipotizziamo partire dall’indirizzo #10)</p>
+         
+         
+         
+         <div class="hcb_wrap"><pre class="prism line-numbers  language-plain"><code class=" language-plain" data-hcb-clip="2">#10: LOD $r0, $r8 carichiamo in $r0 il valore della cella di memoria il cui indirizzo è in $r8
+         #11: LOD $r1, 0 carichiamo in $r1 il valore 0 (valore iniziale di result)
+         #12: LOD $r2, 0 carichiamo in $r2 il valore 0 (valore iniziale di i)
+         #13: ADD $r2, $r2, 1 incrementiamo $r2 di 1
+         #14: ADD $r1, $r1, $r2 sommiamo a $r1 il valore di $r2
+         #15: SUB $r3, $r0, $r2 memorizziamo in $r1 il risultato della sottrazione $r0 - $r2 (n-i)
+         #16: BNE $r3, 0, #13 se il risultato non è 0 (cioè se n-i != 0) allora saltiamo all'istruzione #13 (3 è l'etichetta) e il ciclo ricomincia
+         #17: STO $r1, $r9 memorizza nell'indirizzo di memoria indicato da $r9 il valore di $r1, cioè il risultato<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><button class="hcb-clipboard" data-clipboard-target="[data-hcb-clip=&quot;2&quot;]" data-clipboard-action="copy" aria-label="Copy code to clipboard"></button></div>
+         
+         
+         
+         <p>TPSI&nbsp;– Elenco istruzioni assembly</p>
+         
+         
+         
+         <h2 class="wp-block-heading" data-id="articleTOC_2"><strong>Elenco istruzioni con tutti gli operatori</strong></h2>
+         
+         
+         
+         <figure class="wp-block-table"><table><tbody><tr><td>Istruzione</td><td>Esempi</td><td>Significato</td></tr><tr><td colspan="3">ARITMETICO-LOGICHE</td></tr><tr><td><strong>ADD registro, operando1, operando2</strong></td><td>ADD $r0, 1, 2<br>ADD $r0, $r1, $r2<br>ADD $r0, $r1, 1</td><td>Somma.Operando1 e operando2 possono essere valori dei registri o valori assoluti</td></tr><tr><td><strong>SUB registro, operando1, operando2</strong></td><td>SUB $r0, 1, 2<br>SUB $r0, $r1, $r2<br>SUB $r0, $r1, 1</td><td>Sottrazione.Operando1 e operando2 possono essere valori dei registri o valori assoluti</td></tr><tr><td><strong>MUL registro, operando1, operando2</strong></td><td>MUL $r0, 1, 2<br>MUL $r0, $r1, $r2<br>MUL $r0, $r1, 1</td><td>Moltiplicazione.Operando1 e operando2 possono essere valori dei registri o valori assoluti</td></tr><tr><td><strong>DIV registro, operando1, operando2</strong></td><td>DIV $r0, 1, 2<br>DIV $r0, $r1, $r2<br>DIV $r0, $r1, 1</td><td>Divisione.Operando1 e operando2 possono essere valori dei registri o valori assoluti</td></tr><tr><td><strong>CMP registro, operando1, operando2</strong></td><td>CMP $r0, 1, 2<br>CMP $r0, $r1, $r2<br>CMP $r0, $r1, 1</td><td>Comparazione.&nbsp;Operando1 e operando2 possono essere valori dei registri o valori assoluti.Il risultato è:-1 se operando1 &lt; operando20 se uguali+1 se operando2 &gt; operando1</td></tr><tr><td colspan="3">SALTO</td></tr><tr><td><strong>JMP operando</strong></td><td>JMP $r0JMP #232</td><td>Salto.L’operando può essere un registro (il cui valore sarà considerato un indirizzo) o un valore assoluto.</td></tr><tr><td><strong>BNE operando1, operando2, operando3</strong></td><td>BNE $r0, $r1, #232BNE $r0, $r1, $r3BNE $r0, 5, #232BNE 3, $r1, $r1</td><td>Salto condizionato: eseguito se i valori degli operandi non sono uguali.&nbsp;Operando1 e operando2 possono essere valori dei registri o valori assoluti.Operando3 può essere un indirizzo assoluto oppure un registro (il cui valore sarà considerato un indirizzo)&nbsp;&nbsp;</td></tr><tr><td><strong>BEQ operando1, operando2, operando3</strong></td><td>BEQ $r0, $r1, #232<br>BEQ $r0, $r1, $r3<br>BEQ $r0, 5, #232<br>BNE 3, $r1, $r1</td><td>Salto condizionato: eseguito se i valori degli operandi sono uguali.&nbsp;Operando1 e operando2 possono essere valori dei registri o valori assoluti.Operando3 può essere un indirizzo assoluto oppure un registro (il cui valore sarà considerato un indirizzo)&nbsp;&nbsp;</td></tr><tr><td><strong>CAL indirizzo</strong></td><td>CAL $r0CAL #300</td><td>Esegue una push sullo stack con il valore dell’indirizzo dell’istruzione successiva, ed esegue un salto alla destinazione indicata come operando.</td></tr><tr><td><strong>RET</strong></td><td>RET</td><td>Esegue una pop dallo stack di un indirizzo, e vi esegue un salto.&nbsp;</td></tr></tbody></table></figure>
+         
+         
+         
+         <figure class="wp-block-table"><table><tbody><tr><td colspan="3">MEMORIA</td></tr><tr><td><strong>STO sorgente, destinazione</strong></td><td>STO $r0, $r1<br>STO 5, $r1<br>STO 5, #128<br>STO $r1, #421</td><td>Salva un valore in memoria.&nbsp;<br>La sorgente può essere un registro o un valore assoluto.La destinazione può essere un registro (il cui valore sarà considerato un indirizzo), o un indirizzo assoluto.</td></tr><tr><td><strong>LOD destinazione, sorgente</strong></td><td>LOD $r0, $r1<br>LOD $r1, 5<br>LOD $r2, #128</td><td>Carica un valore dalla memoria.&nbsp;<br>La sorgente può essere un registro (il cui valore sarà considerato un indirizzo), un valore assoluto o un indirizzo assoluto. La destinazione deve essere un registro.&nbsp;</td></tr></tbody></table></figure>
+         
+         
+         
+         <p>Note:</p>
+         
+         
+         
+         <p class="has-text-align-left">– $ indica il prefisso di un registro, # indica un prefisso di un indirizzo, senza prefissi è un valore assoluto;</p>
+         
+         
+         
+         <p class="has-text-align-left">– i registri della CPU sono PC (program counter), IR (istruzione corrente) e SP (indirizzo prima cella libera dello stack), ed infine R0…R9 (registri dati);</p>
+         
+         
+         
+         <p class="has-text-align-left">– si ricorda che in condizioni normali al termine di una istruzione, il PC viene incrementato di 1;</p>
+         
+         
+         
+         <p class="has-text-align-left">– l’esecuzione di una istruzione di salto consiste nel sovrascrivere il PC con l’indirizzo verso cui bisogna saltare;</p>
+         
+         
+         
+         <p class="has-text-align-left">– occorre fare attenzione al contenuto dei registri:</p>
+         
+         
+         
+         <p class="has-text-align-left">– nelle istruzioni aritmetico-logiche, il contenuto del registro è considerato un valore;</p>
+         
+         
+         
+         <p class="has-text-align-left">– nelle istruzioni di salto, quando viene usato un registro per indicare l’istruzione verso cui saltare, il valore sarà considerato un indirizzo (quindi “5” sarà considerato “#5”).</p>
+         
+         
+         
+         <p class="has-text-align-left">– nelle istruzioni di memoria, la sorgente è sempre un valore, la destinazione è sempre un indirizzo.</p>
+         
+         
+         
+         <p class="has-text-align-left">– la PUSH verso lo stack è sempre data dalla coppia di istruzioni:</p>
+         
+         
+         
+         <figure class="wp-block-table"><table><tbody><tr><td>STO $sp, value</td></tr><tr><td>SUB $sp, $sp, 1</td></tr></tbody></table></figure>
+         
+         
+         
+         <p>in quanto è necessario aggiornare SP alla prima posizione libera.</p>
+         
+         
+         
+         <p>– la PULL dallo stack è sempre data dalla coppia di istruzioni:</p>
+         
+         
+         
+         <figure class="wp-block-table"><table><tbody><tr><td>ADD $sp, $sp, 1</td></tr><tr><td>LOD $rX, $sp</td></tr></tbody></table></figure>
+         
+         
+         
+         <p>dove RX è un generico registro. E’ necessario in questo caso aggiornare SP all’ultima posizione occupata.</p>
+         
+         
+         
+         <h2 class="wp-block-heading" data-id="articleTOC_3">In conclusione</h2>
+         
+         
+         
+         <p>– per un semplice ciclo sono necessarie più operazioni a basso livello rispetto a quelle ad alto livello.&nbsp;</p>
+         
+         
+         
+         <p>– il codice macchina (di cui vediamo) è composto da istruzioni semplici e poco costose da realizzare&nbsp;</p>
+         
+         
+         
+         <p>– le istruzioni hanno lo stesso tempo di esecuzione</p>
+         
+         
+         
+         <p>Un set di istruzioni reale è molto più ampio, e si diversifica per <span class="glossaryLink" aria-describedby="tt" data-cmtooltip="<div class=glossaryItemTitle>Architettura</div><div class=glossaryItemBody>&amp;lt;!-- wp:paragraph --&amp;gt;L&amp;#039;architettura di un sistema informatico indica il modo in cui è organizzato il software, di quali componenti e moduli è composto, che ruolo hanno e in che modo comunicano.&amp;lt;br/&amp;gt;&amp;lt;!-- /wp:paragraph --&amp;gt;</div>" data-gt-translate-attributes="[{&quot;attribute&quot;:&quot;data-cmtooltip&quot;, &quot;format&quot;:&quot;html&quot;}]" tabindex="0" role="link">architettura</span>, secondo tecnologie che si sono evolute soprattutto con l’avvento dei microprocessori e le architetture moderne, come RISC e CISC (che differivano proprio per la complessità delle istruzioni) con le loro più recenti evoluzioni (X86&nbsp;&nbsp;-<span class="glossaryLink" aria-describedby="tt" data-cmtooltip="<div class=glossaryItemTitle>Tecnologia</div><div class=glossaryItemBody>&amp;lt;!-- wp:paragraph --&amp;gt;Disciplina che studia e ricerca a livello generale sia la progettazione di manufatti, sia le strategie per realizzarli. Indica inoltre le scienze applicate ai processi di trasformazione e realizzazione di prodotti. Essa è una generalizzazione della tecnica. &amp;lt;br/&amp;gt;&amp;lt;!-- /wp:paragraph --&amp;gt;&amp;lt;!-- wp:paragraph --&amp;gt;&amp;lt;br/&amp;gt;&amp;lt;!-- /wp:paragraph --&amp;gt;</div>" data-gt-translate-attributes="[{&quot;attribute&quot;:&quot;data-cmtooltip&quot;, &quot;format&quot;:&quot;html&quot;}]" tabindex="0" role="link">tecnologia</span> del mercato desktop – e ARM – <span class="glossaryLink" aria-describedby="tt" data-cmtooltip="<div class=glossaryItemTitle>Tecnologia</div><div class=glossaryItemBody>&amp;lt;!-- wp:paragraph --&amp;gt;Disciplina che studia e ricerca a livello generale sia la progettazione di manufatti, sia le strategie per realizzarli. Indica inoltre le scienze applicate ai processi di trasformazione e realizzazione di prodotti. Essa è una generalizzazione della tecnica. &amp;lt;br/&amp;gt;&amp;lt;!-- /wp:paragraph --&amp;gt;&amp;lt;!-- wp:paragraph --&amp;gt;&amp;lt;br/&amp;gt;&amp;lt;!-- /wp:paragraph --&amp;gt;</div>" data-gt-translate-attributes="[{&quot;attribute&quot;:&quot;data-cmtooltip&quot;, &quot;format&quot;:&quot;html&quot;}]" tabindex="0" role="link">tecnologia</span> del mercato mobile).</p>
+         </div>
+      </div>   
+      <div class="row"><a href="#pagina1"><button type="button" id="pag1div2" class="btn btn-primary">Pagina 1 (Stack)</button></a></div>
+      <div class="row"><a href="#pagina3"><button type="button" id="pag3div2" class="btn btn-primary">Pagina 3 (Semafori)</button></a></div>                  
    </div>
    <div id="pagina3" class="page spazio">
       <div class="row">Questo è il contenuto di pagina 3</div> 
-      <div class="row"><a href="#pagina1">Questo è un link a pagina 1</a></div>
-      <div class="row"><a href="#pagina2">Questo è un link a pagina 2</a></div>
-   </div>
-
+      <div class="row"><a href="#pagina1"><button type="button" id="pag1div3" class="btn btn-primary">Pagina 1 (Stack)</button></a></div>
+      <div class="row"><a href="#pagina2"><button type="button" id="pag2div3" class="btn btn-primary">Pagina 3 (Semafori)</button></a></div>
+   </div id="divHomeButton">
       <a href="../index.html"><button type="button" id="home" class="btn btn-success">Home</button></a>
-      
    </div>
    <script type="module" src="./index.js"></script>
 
