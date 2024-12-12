@@ -1,7 +1,12 @@
 .visible {
     display: block;
- }
+}
  
- .hidden {
+.hidden {
     display: none;
- }
+}
+
+.spazio {
+    margin-top: 5%;
+    margin-bottom: 5%;
+}
