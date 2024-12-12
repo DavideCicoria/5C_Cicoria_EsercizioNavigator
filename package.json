@@ -1,0 +1,22 @@
+{
+  "name": "5c_cicoria_esercizionavigator",
+  "version": "1.0.0",
+  "description": "esercizio navigator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DavideCicoria/5C_Cicoria_EsercizioNavigator.git"
+  },
+  "author": "Davide Cicoria",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DavideCicoria/5C_Cicoria_EsercizioNavigator/issues"
+  },
+  "homepage": "https://github.com/DavideCicoria/5C_Cicoria_EsercizioNavigator#readme",
+  "dependencies": {
+    "bootstrap": "^5.3.3"
+  }
+}
